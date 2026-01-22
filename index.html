@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌺 Lì Xì Yêu Thương 🌺</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: radial-gradient(circle, #b91c1c, #450a0a);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #fff;
+            background-attachment: fixed;
+        }
+.lixi-card:hover img {
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9));
+}
+
+        .title-font {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .lixi-card {
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .lixi-card:hover {
+            transform: translateY(-20px) scale(1.1) rotate(3deg) !important;
+            filter: drop-shadow(0 25px 30px rgba(255, 215, 0, 0.4));
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.94);
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: #fff;
+            background-image: url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+            color: #d41f1f;
+            border-radius: 30px;
+            max-width: 650px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.5);
+            position: relative;
+            border: 10px double #ffd700;
+        }
+
+        .confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 150;
+        }
+
+        .opened {
+            filter: grayscale(100%) brightness(0.4) !important;
+            cursor: default;
+            opacity: 0.5;
+        }
+        
+        .opened:hover {
+            transform: none !important;
+        }
+
+        .student-name {
+            display: block;
+            margin-top: 20px;
+            font-weight: 700;
+            color: #b21f1f;
+            border-top: 2px solid #ffd700;
+            padding-top: 15px;
+            font-size: 1.8rem;
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .flower {
+            position: fixed;
+            top: -50px;
+            pointer-events: none;
+            z-index: 1;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(105vh) rotate(360deg);
+            }
+        }
+
+        #music-status {
+            position: fixed;
+            bottom: 85px;
+            right: 24px;
+            font-size: 0.75rem;
+            color: #ffd700;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            border-right: .15em solid orange;
+            white-space: normal;
+            margin: 0 auto;
+            animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { max-height: 0; opacity: 0; }
+            to { max-height: 500px; opacity: 1; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: orange; }
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #d41f1f;
+            box-shadow: 0 0 10px rgba(212, 31, 31, 0.2);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <canvas id="confetti" class="confetti-canvas"></canvas>
+
+    <div class="max-w-6xl mx-auto text-center relative z-10">
+        <h1 class="text-6xl md:text-8xl title-font mb-4 text-yellow-400 animate__animated animate__fadeInDown drop-shadow-2xl">
+           🌺 Lì xì yêu thương 🌺
+        </h1>
+        <p class="text-xl md:text-3xl mb-12 animate__animated animate__fadeInUp text-yellow-100 font-medium tracking-wide">
+            Ba Mẹ hãy đón nhận bao lì xì từ các con yêu nhé! 😘
+        </p>
+
+        <div id="game-grid" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-6 md:gap-10 p-4">
+            <!-- JS dynamic content -->
+        </div>
+    </div>
+
+    <!-- Modal hiển thị thông điệp -->
+    <div id="wish-modal" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-content animate__animated animate__zoomInDown" onclick="event.stopPropagation()">
+            <div class="absolute top-4 right-4 text-3xl cursor-pointer text-gray-400 hover:text-red-600 font-bold" onclick="closeModal()">×</div>
+            <div id="modal-icon" class="text-6xl mb-6">🧧</div>
+            <div id="modal-status-text" class="text-xl font-bold mb-4 text-red-600 hidden">Lộc yêu thương đã trao 💌</div>
+            
+            <div id="step-1">
+                <h2 class="text-xl font-bold mb-2 text-yellow-600 uppercase tracking-[0.4em]">Thông điệp yêu thương</h2>
+                <div id="wish-text" class="text-2xl md:text-3xl italic leading-relaxed text-red-800 font-medium py-8 min-h-[150px] flex flex-col items-center justify-center">
+                    <!-- Nội dung của con -->
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                    <button onclick="showReplyArea()" class="bg-yellow-500 hover:bg-yellow-600 text-red-900 font-bold py-4 px-8 rounded-full transition duration-300 shadow-lg border-2 border-yellow-300">
+                        Con yêu đây rồi!
+                    </button>
+                    <button onclick="closeModal()" class="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-yellow-400 font-bold py-4 px-8 rounded-full transition duration-300 shadow-xl border-2 border-yellow-500">
+                        Cảm ơn con!
+                    </button>
+                </div>
+            </div>
+
+            <div id="step-reply" class="hidden">
+                <h2 class="text-xl font-bold mb-4 text-yellow-600 uppercase">Lời yêu thương đầu xuân</h2>
+                <textarea id="parent-reply" class="w-full h-32 p-4 border-2 border-yellow-400 rounded-xl text-red-800 text-lg resize-none mb-4 bg-yellow-50" placeholder="Ba mẹ muốn nhắn điều gì với con?"></textarea>
+                <button onclick="submitReply()" class="bg-red-700 hover:bg-red-800 text-yellow-400 font-bold py-3 px-10 rounded-full transition duration-300 shadow-lg border-2 border-yellow-500">
+                    Gửi con yêu ❤️
+                </button>
+            </div>
+
+            <div id="step-final" class="hidden">
+                <div class="text-xl md:text-2xl text-red-900 leading-relaxed font-semibold italic p-6 border-2 border-dashed border-red-200 rounded-2xl bg-red-50 typing-effect">
+                    “Mỗi bao lì xì là mỗi lời yêu thương của các con gửi đến ba mẹ. <br>
+                    Dù kết quả học tập thế nào, sự cố gắng, sự trưởng thành và tình cảm của các con luôn là món quà quý giá nhất đầu xuân.”
+                </div>
+                <button onclick="closeModal()" class="mt-8 bg-red-700 hover:bg-red-800 text-yellow-400 font-bold py-3 px-10 rounded-full transition duration-300 shadow-lg border-2 border-yellow-500">
+                    Trân trọng ❤️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="music-status">Nhấn để nghe nhạc Tết</div>
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="music-btn" class="bg-red-700 border-2 border-yellow-500 hover:bg-red-600 text-yellow-400 font-bold p-5 rounded-full shadow-2xl flex items-center gap-3 transition-all scale-100 hover:scale-110" onclick="toggleMusic()">
+            <span id="music-icon" class="text-2xl">🔈</span> <span class="hidden md:inline uppercase tracking-tighter">Thanh âm yêu thương</span>
+        </button>
+        <audio id="bg-music" loop preload="auto">
+    <source src="tet.mp3" type="audio/mpeg">
+</audio>
+
+
+    </div>
+
+    <script>
+        const students = [
+            "Thúy An", "Gia An", "Diệp Anh", "Trúc Anh", "Ngọc Ánh", "Thiên Ân", "Gia Bảo",
+            "Quỳnh Chi", "Minh Duy", "Phúc Đan", "Tiến Đức", "Gia Hân", "Trí Hiếu", "Minh Huy",
+            "Minh Khang", "Minh Khôi", "Minh Khuê", "Thiên Kim", "Sinh Lộc", "Tiểu My",
+            "Khải Nam", "Khôi Nguyên", "Bảo Ngọc", "Nguyễn Nguyễn", "Trọng Nhân", "Hoàng Nhân",
+            "Phi Nhung", "Tấn Phúc", "Đông Quân", "Hương Quỳnh", "Hoàng Thái", "Bảo Thư",
+            "Minh Thy", "Hoàng Trí", "Nhã Uyên"
+        ];
+
+        const messages = [
+            "Con cảm ơn ba mẹ đã luôn vất vả nuôi nấng con nên người.",
+            "Chúc ba mẹ một năm mới dồi dào sức khỏe và luôn hạnh phúc bên con.",
+            "Con biết ơn vì ba mẹ luôn kiên nhẫn lắng nghe mỗi khi con vui buồn.",
+            "Con hứa sẽ nỗ lực cố gắng từng ngày để ba mẹ yên lòng.",
+            "Cảm ơn ba mẹ đã luôn tin tưởng và ủng hộ mọi ước mơ của con.",
+            "Con chúc ba mẹ luôn trẻ trung, yêu đời và gặp nhiều may mắn.",
+            "Biết ơn ba vì những chuyến xe sớm hôm, biết ơn mẹ vì những bữa cơm ngon.",
+            "Con đang học cách tốt hơn mỗi ngày để trở thành niềm tự hào của ba mẹ.",
+            "Chúc gia đình mình luôn ngập tràn tiếng cười và sự ấm áp.",
+            "Con cảm ơn ba mẹ đã cho con một mái ấm tuyệt vời nhất.",
+            "Con sẽ cố gắng hoàn thiện bản thân hơn để mẹ đỡ vất vả lo toan.",
+            "Biết ơn ba mẹ đã dạy cho con những bài học quý giá về sự tử tế.",
+            "Chúc ba mẹ vạn sự như ý, công việc luôn thuận lợi và hanh thông.",
+            "Con yêu ba mẹ nhiều hơn những lời con có thể nói ra.",
+            "Cảm ơn ba mẹ đã luôn bao dung cho những lỗi lầm ngây ngô của con.",
+            "Con chúc ba mẹ luôn bình an, mỗi ngày đều là một ngày vui.",
+            "Con hứa sẽ chăm sóc bản thân tốt để ba mẹ yên lòng công tác.",
+            "Biết ơn ba mẹ đã luôn dành cho con những điều tốt đẹp nhất.",
+            "Chúc ba mẹ có thêm thật nhiều năng lượng và niềm vui trong cuộc sống.",
+            "Con sẽ nỗ lực hơn trong việc tự lập để ba mẹ bớt lo lắng.",
+            "Cảm ơn ba mẹ đã là điểm tựa vững chắc nhất của cuộc đời con.",
+            "Chúc ba mẹ một năm mới tràn đầy tài lộc và thịnh vượng.",
+            "Con biết ơn những lời khuyên dạy nghiêm khắc nhưng đầy tình thương của ba.",
+            "Con mong gia đình mình mãi gắn kết và yêu thương nhau như thế này.",
+            "Con đang học cách quản lý bản thân tốt hơn từng ngày.",
+            "Cảm ơn mẹ vì những cái ôm ấm áp mỗi khi con thấy mệt mỏi.",
+            "Chúc ba mẹ luôn giữ được ngọn lửa đam mê trong công việc.",
+            "Con biết ơn sự hy sinh thầm lặng của ba mẹ dành cho con.",
+            "Con hứa sẽ luôn trung thực, hiếu thảo và sống có trách nhiệm.",
+            "Chúc ba mẹ luôn rạng rỡ như những đóa hoa xuân.",
+            "Cảm ơn ba mẹ đã cho con cơ hội được học tập và lớn khôn.",
+            "Con mong ba mẹ hãy dành thời gian nghỉ ngơi và yêu bản thân nhiều hơn.",
+            "Biết ơn ba mẹ vì đã luôn che chở con trước những bão giông.",
+            "Con chúc ba mẹ mỗi năm đều hạnh phúc và khỏe mạnh hơn năm cũ.",
+            "Con đang nỗ lực hết mình để mỗi ngày đều tiến bộ hơn một chút."
+        ];
+const lixiImages = Array.from({ length: 35 }, (_, i) => 
+    `${i + 1}.jpg`
+);
+
+
+        let data = students.map((name, index) => ({
+    name: name,
+    message: messages[index],
+    image: lixiImages[index]
+}));
+
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        data = shuffle(data);
+
+        const grid = document.getElementById('game-grid');
+        const modal = document.getElementById('wish-modal');
+        const wishText = document.getElementById('wish-text');
+        const music = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-btn');
+        const musicIcon = document.getElementById('music-icon');
+        const musicStatus = document.getElementById('music-status');
+
+      function getLixiImage(imageSrc) {
+    return `
+        <img 
+            src="${imageSrc}" 
+            alt="Bao lì xì yêu thương"
+            class="w-[120px] md:w-[150px] transition-all duration-300"
+            style="filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));"
+        />
+    `;
+}
+
+
+
+
+
+        function createFlowers() {
+            const flowerCount = 15;
+            for(let i=0; i<flowerCount; i++) {
+                const f = document.createElement('div');
+                f.className = 'flower';
+                const isMai = Math.random() > 0.5;
+                f.innerHTML = isMai ? '🌼' : '🌸';
+                f.style.left = Math.random() * 100 + 'vw';
+                f.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                f.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                f.style.opacity = Math.random() * 0.7 + 0.3;
+                document.body.appendChild(f);
+            }
+        }
+
+        function initGame() {
+            createFlowers();
+            data.forEach((item, i) => {
+                const div = document.createElement('div');
+                const randomRotate = Math.floor(Math.random() * 8) - 4;
+                div.className = 'lixi-card animate__animated animate__fadeInUp';
+                div.style.animationDelay = `${i * 0.03}s`;
+                div.style.transform = `rotate(${randomRotate}deg)`;
+                div.innerHTML = getLixiImage(item.image);
+                div.onclick = () => openLixi(i, div);
+                grid.appendChild(div);
+            });
+            
+            setTimeout(() => {
+                if(music.paused) musicStatus.style.display = 'block';
+            }, 2000);
+        }
+
+        function openLixi(index, element) {
+            if (element.classList.contains('opened')) return;
+            const student = data[index];
+            
+            // Reset modal steps
+            document.getElementById('step-1').classList.remove('hidden');
+            document.getElementById('step-reply').classList.add('hidden');
+            document.getElementById('step-final').classList.add('hidden');
+            document.getElementById('modal-status-text').classList.add('hidden');
+            document.getElementById('modal-icon').classList.remove('hidden');
+            document.getElementById('parent-reply').value = '';
+            document.getElementById('modal-icon').innerText = '🧧';
+
+            wishText.innerHTML = `
+                <span class="mb-4">"${student.message}"</span>
+                <span class="student-name">Tình yêu từ con: ${student.name}</span>
+            `;
+            modal.style.display = 'flex';
+            startConfetti();
+            element.classList.add('opened');
+            element.style.transform = "scale(0.8) translateY(20px) rotate(0deg) !important";
+        }
+
+        function showReplyArea() {
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-reply').classList.remove('hidden');
+            document.getElementById('modal-icon').innerText = '✍️';
+            document.getElementById('parent-reply').focus();
+        }
+
+        function submitReply() {
+            document.getElementById('step-reply').classList.add('hidden');
+            document.getElementById('step-final').classList.remove('hidden');
+            document.getElementById('modal-icon').classList.add('hidden');
+            document.getElementById('modal-status-text').classList.remove('hidden');
+            startConfetti(); 
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            stopConfetti();
+        }
+
+        function toggleMusic() {
+            if (music.paused) {
+                music.play().then(() => {
+                    musicIcon.innerText = "🔊";
+                    musicBtn.classList.replace('bg-red-700', 'bg-green-600');
+                    musicStatus.style.display = 'none';
+                }).catch(err => {
+                    console.log("Autoplay blocked");
+                });
+            } else {
+                music.pause();
+                musicIcon.innerText = "🔈";
+                musicBtn.classList.replace('bg-green-600', 'bg-red-700');
+            }
+        }
+
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        let pieces = [];
+        let animationFrame;
+
+        function startConfetti() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            pieces = [];
+            const colors = ['#ffd700', '#ff0000', '#fff', '#ff69b4', '#00ff00'];
+            for (let i = 0; i < 150; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 4 + 2,
+                    rotation: Math.random() * 360,
+                    oscillation: Math.random() * 2
+                });
+            }
+            if (!animationFrame) animateConfetti();
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            pieces.forEach(p => {
+                p.y += p.speed;
+                p.x += Math.sin(p.y / 30) * p.oscillation;
+                p.rotation += 4;
+                if (p.y > canvas.height) p.y = -20;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+                ctx.restore();
+            });
+            animationFrame = requestAnimationFrame(animateConfetti);
+        }
+
+        function stopConfetti() {
+            cancelAnimationFrame(animationFrame);
+            animationFrame = null;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        window.onload = initGame;
+        window.onresize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+    </script>
+</body>
+</html>
